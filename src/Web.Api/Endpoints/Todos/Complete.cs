@@ -1,6 +1,5 @@
-﻿using Application.Todos.Complete;
-using Application.Todos.Delete;
-using MediatR;
+﻿using Application.Abstractions.Messaging;
+using Application.Todos.Complete;
 using SharedKernel;
 using Web.Api.Extensions;
 using Web.Api.Infrastructure;
@@ -11,11 +10,11 @@ internal sealed class Complete : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPut("todos/{id:guid}/complete", async (Guid id, ISender sender, CancellationToken cancellationToken) =>
+        app.MapPut("todos/{id:guid}/complete", async (Guid id, ICommandHandler<CompleteTodoCommand> handler, CancellationToken cancellationToken) =>
         {
             var command = new CompleteTodoCommand(id);
 
-            Result result = await sender.Send(command, cancellationToken);
+            Result result = await handler.Handle(command, cancellationToken);
 
             return result.Match(Results.NoContent, CustomResults.Problem);
         })

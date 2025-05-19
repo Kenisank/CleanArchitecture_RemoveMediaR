@@ -1,4 +1,5 @@
-﻿using Application.Todos.Delete;
+﻿using Application.Abstractions.Messaging;
+using Application.Todos.Delete;
 using MediatR;
 using SharedKernel;
 using Web.Api.Extensions;
@@ -10,11 +11,11 @@ internal sealed class Delete : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapDelete("todos/{id:guid}", async (Guid id, ISender sender, CancellationToken cancellationToken) =>
+        app.MapDelete("todos/{id:guid}", async (Guid id, ICommandHandler<DeleteTodoCommand> handler, CancellationToken cancellationToken) =>
         {
             var command = new DeleteTodoCommand(id);
 
-            Result result = await sender.Send(command, cancellationToken);
+            Result result = await handler.Handle(command, cancellationToken);
 
             return result.Match(Results.NoContent, CustomResults.Problem);
         })
